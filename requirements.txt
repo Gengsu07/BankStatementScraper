@@ -1,0 +1,9 @@
+pypdf2
+pdfplumber
+pytesseract
+Pillow
+opencv-python
+pandas
+openpyxl
+pdf2image
+ipykernel
