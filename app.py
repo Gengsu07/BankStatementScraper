@@ -13,8 +13,8 @@ with st.sidebar:
     )
 
 
-konvert_pdf = st.Page(page="./nav/konvert.py", title=" ▶︎ Sedot Rekening Koran")
-sample_report = st.Page(page="./sampel/sampel.py", title="▶︎ Pilih Sampel")
-about = st.Page(page="./nav/about.py", title="▶︎ Tentang")
+konvert_pdf = st.Page(page="./src/pages/konvert.py", title=" ▶︎ Sedot Rekening Koran")
+sample_report = st.Page(page="./src/sampel/sampel.py", title="▶︎ Pilih Sampel")
+about = st.Page(page="./src/pages/about.py", title="▶︎ Tentang")
 pages = st.navigation([konvert_pdf, sample_report, about])
 pages.run()

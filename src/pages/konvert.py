@@ -1,7 +1,10 @@
 import os
+
+# from nltk.corpus import stopwords
+# from wordcloud import WordCloud
+import sys
 from io import BytesIO
-from parser.parse import is_text_pdf
-from parser.parse import main as parser
+from parser.parse import is_text_pdf, main
 
 # import nltk
 import pandas as pd
@@ -12,8 +15,7 @@ from streamlit_pdf_viewer import pdf_viewer
 
 from sampel.sampel import get_sampel_code
 
-# from nltk.corpus import stopwords
-# from wordcloud import WordCloud
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../parser")))
 
 
 # try:
@@ -99,7 +101,7 @@ if bank != "bank" and sampel is not None:
     sedot = st.button("Sedot Data", type="primary")
     if sedot and file is not None:
 
-        data, jmlh_hlmn = parser(bank, file, sampel)
+        data, jmlh_hlmn = main(bank, file, sampel)
         # data, jmlh_hlmn = parser(
         #     "mandiri",
         #     "D:\\OneDrive - Kemenkeu\\PEMERIKSA\\Rekening\\Mandiri Jan - Des.pdf",
@@ -127,3 +129,10 @@ if bank != "bank" and sampel is not None:
         )
         if os.path.exists("uploadedfile.pdf"):
             os.remove("uploadedfile.pdf")
+if __name__ == "__main__":
+    data, jmlh_hlmn = parser(
+        "bri",
+        r"CAHAYA DES.pdf",
+        "bri_1.pdf",
+    )
+    print(data)
