@@ -5,12 +5,12 @@ services:
     build:
       context: .
     volumes:
-      # Sync the working directory with the `/app` directory in the container
-      - .:/app
-      # Exclude the project virtual environment from being synced into the container
-      - ./.venv:/app/.venv
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: streamlit run app.py
+      # Only sync the source code
+      - ./app.py:/app/app.py
+      - ./parser/:/app/parser
+      - ./sampel/:/app/sampel
+      - ./pyproject.toml:/app/pyproject.toml
+      # Prevent the .venv from being mounted
+      - /app/.venv
     ports:
       - "8501:8501"

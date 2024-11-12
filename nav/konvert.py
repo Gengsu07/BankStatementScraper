@@ -1,5 +1,6 @@
 import os
 from io import BytesIO
+from parser.parse import is_text_pdf
 from parser.parse import main as parser
 
 # import nltk
@@ -85,11 +86,14 @@ if bank != "bank" and sampel is not None:
     # bytes_data = file.getvalue()
     # st.write(bytes_data)
     if file is not None:
-
+        if is_text_pdf(file):
+            st.success(" Text Based PDF Detected")
+        else:
+            st.warning("Non-Text Based PDF Detected")
         viewfile = st.button(label="Lihat halaman pertama", type="secondary")
         if viewfile:
 
-            with st.container():
+            with st.expander(label="pdf", expanded=True):
                 pdf_viewer(file.getvalue(), width=700, pages_to_render=[1])
 
     sedot = st.button("Sedot Data", type="primary")
@@ -102,7 +106,10 @@ if bank != "bank" and sampel is not None:
         #     "mandiri_1.pdf",
         # )
         st.spinner("Tunggu sebentar...")
-        st.write("Jumlah Halaman: ", jmlh_hlmn)
+        st.write()
+        st.info(
+            f"Bank: {bank} | Jumlah Halaman: {jmlh_hlmn} | Total Data: {data.shape[0]} rows"
+        )
         # st.plotly_chart(bar(data), use_container_width=True)
         # st.header("Kata-Kata yang Sering Muncul")
         # text = " ".join(data["Keterangan"].str.lower().tolist())

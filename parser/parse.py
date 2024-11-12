@@ -1,10 +1,10 @@
+from parser.bca import bca_1
+from parser.bri import bri_1
+from parser.mandiri import mandiri_1
+
 import pandas as pd
 import pdfplumber
 import pytesseract
-
-from .bca import bca_1
-from .bri import bri_1
-from .mandiri import mandiri_1
 
 
 # Detect if PDF is text-based or image-based
@@ -81,6 +81,7 @@ def text_to_df(text, bank: str, sampel):
         if bank.lower() == "bca" and sampel == "bca_1.pdf":
             data, jml_hlmn = bca_1(text)
             df_data = pd.DataFrame(data)
+            print(f"parsed: bca_1 {df_data.shape[0]} rows")
             df_data = df_data[
                 ["Tanggal", "Keterangan", "MUTASI", "DB/CR", "SALDO", "halaman"]
             ]
@@ -95,10 +96,12 @@ def text_to_df(text, bank: str, sampel):
         elif bank.lower() == "mandiri" and sampel == "mandiri_1.pdf":
             data, jml_hlmn = mandiri_1(text)
             df_data = pd.DataFrame(data)
+            print(f"parsed: mandiri_1 {df_data.shape[0]} rows")
 
         elif bank.lower() == "bri" and sampel == "bri_1.pdf":
             data, jml_hlmn = bri_1(text)
             df_data = pd.DataFrame(data)
+            print(f"parsed: bri_1 {df_data.shape[0]} rows")
             columns_todo = ["debet", "kredit", "saldo"]
             for col in columns_todo:
                 df_data[col] = df_data[col].apply(
@@ -130,7 +133,7 @@ def main(bank: str, path, sampel):
 if __name__ == "__main__":
     data, jmlh_hlmn = main(
         "bri",
-        r"D:\OneDrive - Kemenkeu\PEMERIKSA\Job Shadowing\2.Pembimbingan Materi Pemeriksaan\Cahaya Triagro Soy\Data WP\Rekening Koran\BRI\CAHAYA DES.pdf",
+        r"CAHAYA DES.pdf",
         "bri_1.pdf",
     )
     print(data)

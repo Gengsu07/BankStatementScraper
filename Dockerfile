@@ -12,16 +12,17 @@ ADD https://astral.sh/uv/install.sh /uv-installer.sh
 # Run the installer then remove it
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
-ENV VIRTUAL_ENV="/app/.venv"
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV VIRTUAL_ENV="/app/.venv" \
+    PATH="$VIRTUAL_ENV/bin:/root/.local/bin:$PATH"
 
 WORKDIR /app
 
 COPY . .
 
 
-RUN uv sync --frozen
-
+RUN python -m venv $VIRTUAL_ENV && \
+    $VIRTUAL_ENV/bin/python -m pip install --upgrade pip && \
+    uv sync --frozen
 EXPOSE 8501
 
-CMD ["streamlit", "run", "app.py"]
+CMD ["uv","run","streamlit", "run", "app.py"]
