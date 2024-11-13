@@ -73,7 +73,7 @@ def extract_pdf(pdf_path):
     return extracted_data
 
 
-def text_to_df(text, bank: str, sampel):
+def text_to_df(text, bank: str, sampel: str):
     df_data = None
     jml_hlmn = 0
 
@@ -81,26 +81,30 @@ def text_to_df(text, bank: str, sampel):
         if bank.lower() == "bca" and sampel == "bca_1.pdf":
             data, jml_hlmn = bca_1(text)
             df_data = pd.DataFrame(data)
+            del data
             print(f"parsed: bca_1 {df_data.shape[0]} rows")
             df_data = df_data[
-                ["Tanggal", "Keterangan", "MUTASI", "DB/CR", "SALDO", "halaman"]
+                ["Tanggal", "Keterangan", "CBG", "MUTASI", "DB/CR", "SALDO", "halaman"]
             ]
             df_data.loc[:, "MUTASI":"SALDO"] = df_data.loc[:, "MUTASI":"SALDO"].fillna(
                 ""
             )
             df_data["MUTASI"] = df_data["MUTASI"].apply(
-                lambda x: x.replace(",", "").replace(".", "")
+                lambda x: x.replace(",", "").split(".")[0]
             )
 
             df_data["MUTASI"] = pd.to_numeric(df_data["MUTASI"], errors="coerce")
+
         elif bank.lower() == "mandiri" and sampel == "mandiri_1.pdf":
             data, jml_hlmn = mandiri_1(text)
             df_data = pd.DataFrame(data)
+            del data
             print(f"parsed: mandiri_1 {df_data.shape[0]} rows")
 
         elif bank.lower() == "bri" and sampel == "bri_1.pdf":
             data, jml_hlmn = bri_1(text)
             df_data = pd.DataFrame(data)
+            del data
             print(f"parsed: bri_1 {df_data.shape[0]} rows")
             columns_todo = ["debet", "kredit", "saldo"]
             for col in columns_todo:
@@ -117,7 +121,7 @@ def text_to_df(text, bank: str, sampel):
     return df_data, jml_hlmn
 
 
-def main(bank: str, path, sampel):
+def main(bank: str, path, sampel: str):
     if not path:
         return None
     try:
@@ -132,8 +136,8 @@ def main(bank: str, path, sampel):
 
 if __name__ == "__main__":
     data, jmlh_hlmn = main(
-        "bri",
-        r"CAHAYA DES.pdf",
-        "bri_1.pdf",
+        "bca",
+        r"D:\OneDrive - Kemenkeu\PEMERIKSA\Job Shadowing\2.Pembimbingan Materi Pemeriksaan\Cahaya Triagro Soy\Data WP\Rekening Koran\BCA KAS\ESTATEMENT_00945000029_202202.pdf",
+        "bca_1.pdf",
     )
     print(data)

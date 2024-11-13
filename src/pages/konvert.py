@@ -1,8 +1,10 @@
 import os
+import sys
+from pathlib import Path
 
+sys.path.append(str(Path(__file__).parent.parent))
 # from nltk.corpus import stopwords
 # from wordcloud import WordCloud
-import sys
 from io import BytesIO
 from parser.parse import is_text_pdf, main
 
@@ -14,8 +16,6 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 
 from sampel.sampel import get_sampel_code
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../parser")))
 
 
 # try:
@@ -78,17 +78,19 @@ if bank != "bank":
         st.stop()
     sampel = st.selectbox(
         label="Pilih sampel (cek menu sampel)",
-        options=[x.split("\\")[-1] for x in sampel_list],
+        options=[os.path.basename(x) for x in sampel_list],
     )
 
 
 if bank != "bank" and sampel is not None:
     st.header("Upload PDF")
-    file = st.file_uploader(label="Pilih file", type=("pdf"))
+    files = st.file_uploader(
+        label="Pilih file", type=("pdf"), accept_multiple_files=True
+    )
     # bytes_data = file.getvalue()
     # st.write(bytes_data)
-    if file is not None:
-        if is_text_pdf(file):
+    if files is not None and len(files) > 0:
+        if is_text_pdf(files[0]):
             st.success(" Text Based PDF Detected")
         else:
             st.warning("Non-Text Based PDF Detected")
@@ -96,22 +98,34 @@ if bank != "bank" and sampel is not None:
         if viewfile:
 
             with st.expander(label="pdf", expanded=True):
-                pdf_viewer(file.getvalue(), width=700, pages_to_render=[1])
+                pdf_viewer(files[0].getvalue(), width=700, pages_to_render=[1])
 
     sedot = st.button("Sedot Data", type="primary")
-    if sedot and file is not None:
 
-        data, jmlh_hlmn = main(bank, file, sampel)
-        # data, jmlh_hlmn = parser(
-        #     "mandiri",
-        #     "D:\\OneDrive - Kemenkeu\\PEMERIKSA\\Rekening\\Mandiri Jan - Des.pdf",
-        #     "mandiri_1.pdf",
-        # )
-        st.spinner("Tunggu sebentar...")
+    if sedot and files is not None:
+        jmlh_hlmn = 0
+        data = pd.DataFrame()
+        wait_msg = st.progress(0, text="Tunggu sebentar...")
+
+        placeholder_info = st.empty()
+
+        for jmlhfile, file in enumerate(files):
+            placeholder_info.info(
+                f"Proses File: {jmlhfile + 1} dari {len(files)}",
+                icon=":material/hourglass_top:",
+            )
+            wait_msg.progress((jmlhfile + 1) / len(files))
+
+            df_temp, halaman = main(bank, file, sampel)
+            df_temp["Nama FIle"] = file.name
+            data = pd.concat([data, df_temp], ignore_index=True, sort=False)
+            jmlh_hlmn += halaman
+
         st.write()
         st.info(
             f"Bank: {bank} | Jumlah Halaman: {jmlh_hlmn} | Total Data: {data.shape[0]} rows"
         )
+
         # st.plotly_chart(bar(data), use_container_width=True)
         # st.header("Kata-Kata yang Sering Muncul")
         # text = " ".join(data["Keterangan"].str.lower().tolist())
@@ -127,12 +141,7 @@ if bank != "bank" and sampel is not None:
             file_name=f"Rekening Koran {bank}_{sampel}.xlsx",
             on_click=st.balloons,
         )
+        files = None
+
         if os.path.exists("uploadedfile.pdf"):
             os.remove("uploadedfile.pdf")
-if __name__ == "__main__":
-    data, jmlh_hlmn = parser(
-        "bri",
-        r"CAHAYA DES.pdf",
-        "bri_1.pdf",
-    )
-    print(data)

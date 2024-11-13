@@ -37,6 +37,16 @@ def bca_1(text):
                     parts_cek = parts
                     # parts_cek = [x.replace(",", "") for x in parts]
                     # parts_cekpostif = [x.replace("-", "") for x in parts_cek]
+
+                    # handling cbg
+                    cbg = re.findall(r"(?<![\d/,\.])\b\d{1,4}\b(?![,\./])", line)
+                    if len(cbg) > 1:
+                        cbg = cbg[-1]
+                    elif len(cbg) == 1:
+                        cbg = cbg[0]
+                    else:
+                        cbg = ""
+                    current_entry["CBG"] = cbg
                     digits = re.findall(r"-?\d{1,3}(?:,\d{3})*\.\d{2}", line)
                     count_digit = len(digits)
 
@@ -65,19 +75,6 @@ def bca_1(text):
                     keterangan.clear()
                     keterangan.append(" ".join(parts[1:-count_digit]))
 
-                    for col in range(count_digit):
-                        if parts[(len(parts) - count_digit) + col] == "DB":
-                            current_entry["3"] = parts[(len(parts) - count_digit) + col]
-                            current_entry["2"] = parts[
-                                (len(parts) - count_digit) + col - 1
-                            ]
-
-                        elif count_digit == 1:
-                            continue
-                        else:
-                            current_entry[f"{col+1}"] = parts[
-                                (len(parts) - count_digit) + col
-                            ]
                     current_entry["halaman"] = halaman + 1
                     data.append(current_entry)
                 else:
