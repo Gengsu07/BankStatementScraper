@@ -117,11 +117,10 @@ if bank != "bank" and sampel is not None:
             wait_msg.progress((jmlhfile + 1) / len(files))
 
             df_temp, halaman = main(bank, file, sampel)
-            df_temp["Nama FIle"] = file.name
+            df_temp["Nama File"] = file.name
             data = pd.concat([data, df_temp], ignore_index=True, sort=False)
             jmlh_hlmn += halaman
-
-        st.write()
+        del df_temp
         st.info(
             f"Bank: {bank} | Jumlah Halaman: {jmlh_hlmn} | Total Data: {data.shape[0]} rows"
         )

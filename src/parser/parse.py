@@ -1,10 +1,10 @@
-from parser.bca import bca_1
-from parser.bri import bri_1
-from parser.mandiri import mandiri_1
-
 import pandas as pd
 import pdfplumber
 import pytesseract
+
+from src.parser.bca import bca_1
+from src.parser.bri import bri_1
+from src.parser.mandiri import mandiri_1
 
 
 # Detect if PDF is text-based or image-based
