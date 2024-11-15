@@ -65,7 +65,7 @@ def to_excel(df: pd.DataFrame):
 
 st.title("Rekening Koran to Excel")
 st.caption("Data Tidak Akan Disimpan Dalam Aplikasi Setelah Selesai Konversi")
-
+st.title("ds")
 st.divider()
 
 st.header("Pilih Bank")
@@ -90,40 +90,67 @@ if bank != "bank" and sampel is not None:
     # bytes_data = file.getvalue()
     # st.write(bytes_data)
     if files is not None and len(files) > 0:
-        if is_text_pdf(files[0]):
+        filecheck = []
+        for file in files:
+            if is_text_pdf(file):
+                filecheck.append({"textbased": file.name})
+            else:
+                filecheck.append({"non-textbased": file.name})
+
+        textbased = not any("non-textbased" in entry for entry in filecheck)
+        if textbased:
             st.success(" Text Based PDF Detected")
         else:
             st.warning("Non-Text Based PDF Detected")
+            st.info("Daftar File Non Text Based:")
+            for file in filecheck:
+                if "non-textbased" in file:
+                    st.error(f"{file['non-textbased']}")
+
         viewfile = st.button(label="Lihat halaman pertama", type="secondary")
         if viewfile:
 
             with st.expander(label="pdf", expanded=True):
                 pdf_viewer(files[0].getvalue(), width=700, pages_to_render=[1])
 
-    sedot = st.button("Sedot Data", type="primary")
+        if textbased:
+            sedot = st.button("Sedot Data", type="primary")
 
-    if sedot and files is not None:
-        jmlh_hlmn = 0
-        data = pd.DataFrame()
-        wait_msg = st.progress(0, text="Tunggu sebentar...")
+            if sedot and files is not None:
+                jmlh_hlmn = 0
+                data = pd.DataFrame()
+                wait_msg = st.progress(0, text="Tunggu sebentar...")
 
-        placeholder_info = st.empty()
+                placeholder_info = st.empty()
 
-        for jmlhfile, file in enumerate(files):
-            placeholder_info.info(
-                f"Proses File: {jmlhfile + 1} dari {len(files)}",
-                icon=":material/hourglass_top:",
-            )
-            wait_msg.progress((jmlhfile + 1) / len(files))
+                for jmlhfile, file in enumerate(files):
+                    placeholder_info.info(
+                        f"Proses File: {jmlhfile + 1} dari {len(files)}",
+                        icon=":material/hourglass_top:",
+                    )
+                    wait_msg.progress((jmlhfile + 1) / len(files))
 
-            df_temp, halaman = main(bank, file, sampel)
-            df_temp["Nama File"] = file.name
-            data = pd.concat([data, df_temp], ignore_index=True, sort=False)
-            jmlh_hlmn += halaman
-        del df_temp
-        st.info(
-            f"Bank: {bank} | Jumlah Halaman: {jmlh_hlmn} | Total Data: {data.shape[0]} rows"
-        )
+                    df_temp, halaman = main(bank, file, sampel)
+                    df_temp["Nama File"] = file.name
+                    data = pd.concat([data, df_temp], ignore_index=True, sort=False)
+                    jmlh_hlmn += halaman
+                del df_temp
+                st.info(
+                    f"Bank: {bank} | Jumlah Halaman: {jmlh_hlmn} | Total Data: {data.shape[0]} rows"
+                )
+
+                st.dataframe(data, use_container_width=True)
+
+                st.download_button(
+                    label="Download Excel",
+                    data=to_excel(data),
+                    file_name=f"Rekening Koran {bank}_{sampel}.xlsx",
+                    on_click=st.balloons,
+                )
+                files = None
+
+                if os.path.exists("uploadedfile.pdf"):
+                    os.remove("uploadedfile.pdf")
 
         # st.plotly_chart(bar(data), use_container_width=True)
         # st.header("Kata-Kata yang Sering Muncul")
@@ -132,15 +159,3 @@ if bank != "bank" and sampel is not None:
         # text = " ".join([x for x in text.split() if x not in filtertext])
         # if text:
         #     st.pyplot(wordcloud(text), use_container_width=True)
-        st.dataframe(data, use_container_width=True)
-
-        st.download_button(
-            label="Download Excel",
-            data=to_excel(data),
-            file_name=f"Rekening Koran {bank}_{sampel}.xlsx",
-            on_click=st.balloons,
-        )
-        files = None
-
-        if os.path.exists("uploadedfile.pdf"):
-            os.remove("uploadedfile.pdf")
